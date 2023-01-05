@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+{% include 'register_css.html' %}
+
+<div class="container">
+    <div class="forms-container">
+      <div class="signin-signup">
+        <form class="form-signup" method="post">
+          {% csrf_token %}
+          <h2 class="title">Create an Account</h2>
+          <div class="input-field">
+            <i class="fas fa-envelope"></i>
+            <input type="email" name="email" placeholder="Email" required="yes">
+          </div>
+          <div class="input-field">
+            <i class="fas fa-user"></i>
+            <input type="text" name="username" placeholder="Username" required="yes">
+          </div>
+          <div class="input-field">
+            <i class="fas fa-lock"></i>
+            <input type="password" name="password1" placeholder="Password" required="yes">
+          </div>
+
+          <div class="input-field">
+            <i class="fas fa-lock"></i>
+            <input type="password" name="password2" placeholder="Confirm Password" required="yes">
+          </div>
+          <input type="submit" value="Create" class="btn solid">
+        </form>
+
+        {% for field in registration_form %}
+				<p>
+				{% for error in field.errors %}
+				<p style="color: red">{{ error }}</p>
+				{% endfor %}
+				</p>
+				{% endfor %}
+				{% if registration_form.non_field_errors %}
+				<div style="color: red">
+					<p>{{registration_form.non_field_errors}}</p>
+				</div>
+
+				{% endif %}
+      </div>
+    </div>
+    <div class="panels-container">
+      <div class="panel left-panel">
+        <div class="content">
+          <h3>Already have an account?</h3>
+          <p>Login to see your preferred news</p>
+          <button class="btn transparent" id="sign-up-btn">Login</button>
+        </div>
+        <img src="img/log.svg" class="image" alt="">
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}

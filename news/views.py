@@ -26,11 +26,12 @@ def news_scrap(request, domain):
         all_news[news_count] = [news_link,news_heading]
 
         news_count += 1
-
+    
     dicts = {}
     dicts['data'] =  all_news
+    
 
-    print(dicts)
+    print(dicts['data'])
 
     return render(request,"news.html",dicts)
 
