@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+{% include 'choose_preference_css.html' %}
+
+<div class="allWrapper">
+    <header class="header" id="header">
+
+    </header><!-- end of header -->
+
+    <section class="quiz_section" id="quizeSection">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-sm-12">
+                    <div class="quiz_content_area">
+                        <h1 class="quiz_title">Choose News Domains</h1>
+                        <form method="post">
+                        <div class="row">
+                            <!-- <form class="form-domain-select" method="post"> -->
+                            {% csrf_token %}
+                            {% for domains in preferences %}
+                            <div class="col-sm-3">
+                                <div class="quiz_card_area">
+                                    <input class="quiz_checkbox" name="preferred_domains" type="checkbox" id="{{domains.id}}" value="{{domains.id}}"/>
+                                    <div class="single_quiz_card">
+                                        <div class="quiz_card_content">
+                                            <div class="quiz_card_icon">
+                                                <div class="quiz_icon quiz_icon1" style ="background-image: None;"></div>
+                                            </div><!-- end of quiz_card_media -->
+    
+                                            <div class="quiz_card_title">
+                                                    <h3><i class="fa fa-check" aria-hidden="true"></i> {{domains.domain_name}}</h3>
+                                            </div><!-- end of quiz_card_title -->
+                                        </div><!-- end of quiz_card_content -->
+                                    </div><!-- end of single_quiz_card -->
+                                </div><!-- end of quiz_card_area -->
+                            </div><!-- end of col3  -->
+                            {% endfor %}
+                            <input type="hidden" value="{{user.id}}" name="user_id">
+                            <input type="text" name="preferences" class="all_preferences">
+                            <div class="col-sm-12">
+                                <div class="quiz_next">
+                                    <input type="submit" class="quiz_continueBtn" value="Continue">
+                                </div><!-- end of quiz_next -->
+                            </div><!-- end of col12 -->
+                            
+
+                        </div><!-- end of quiz_card_area -->
+                    </form>
+                    </div><!-- end of quiz_content_area -->
+
+                </div><!-- end of col12 -->
+            </div><!-- end of row -->
+        </div><!-- end of container -->
+    </section><!-- end of quiz_section -->
+</div><!-- end of allWrapper -->
+
+<script>
+    $(document).ready(function(){
+        $(".quiz_checkbox").click(function(){
+            var all_preferences = ""
+            $(".quiz_checkbox:checked").each(function(){
+                if(all_preferences == "")
+                {
+                    all_preferences+=$(this).val()
+                }
+                else{
+                    all_preferences+=","+$(this).val()
+                } 
+            });
+            $(".all_preferences").val(all_preferences)
+        });
+    });
+</script>
+
+{% endblock content %}

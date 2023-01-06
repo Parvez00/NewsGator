@@ -1,0 +1,17 @@
+<script>
+    $(document).ready(function(){
+        $(".quiz_checkbox").click(function(){
+            var all_preferences = ""
+            $(".quiz_checkbox:checked").each(function(){
+                if(all_preferences == "")
+                {
+                    all_preferences+=$(this).val()
+                }
+                else{
+                    all_preferences+=","+$(this).val()
+                } 
+            });
+            $(".all_preferences").val(all_preferences)
+        });
+    });
+</script>

@@ -56,3 +56,28 @@ class Account(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
+
+class NewsPreference(models.Model):
+    user_id = models.IntegerField(null=False)
+    news_preference = models.TextField(null=False, max_length=1000)
+    is_active = models.BooleanField(default=True)
+    added_at = models.DateTimeField(verbose_name="added at",auto_now_add=True)
+
+    REQUIRED_FIELDS = ['user_id','news_preference']
+
+    def __str__(self):
+        return self.user_id
+
+
+class NewsDomain(models.Model):
+    domain_name = models.CharField(null=False, max_length=255)
+    domain_source = models.TextField(null=False, max_length=1000)
+    domain_link = models.TextField(null=False, max_length=1000)
+    domain_image = models.TextField(null=False, max_length=1000)
+    is_active = models.BooleanField(default=True)
+
+    REQUIRED_FIELDS = ['domain_name','domain_source','domain_link']
+
+    def __str__(self):
+        return self.domain_name
