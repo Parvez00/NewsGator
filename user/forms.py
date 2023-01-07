@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate
 
-from user.models import Account
+from user.models import Account, NewsPreference
 
 
 class RegistrationForm(UserCreationForm):
@@ -43,4 +43,26 @@ class AccountAuthenticationForm(forms.ModelForm):
 			password = self.cleaned_data['password']
 			if not authenticate(email=email, password=password):
 				raise forms.ValidationError("Invalid login")
+
+
+
+class PreferenceSelectionForm(forms.ModelForm):
+	user_id = forms.IntegerField(required=True)
+	news_preference = forms.CharField(required=True)
+
+	class Meta:
+		model = NewsPreference
+		fields = ('user_id','news_preference')
+		# exclude = ('is_active','added_at')
+
+	def clean(self):
+		user_id = self.cleaned_data['user_id']
+		news_preference = self.cleaned_data['news_preference']
+
+		if user_id == '' or news_preference == '':
+			raise forms.ValidationError("Please choose atleast one news domain!")
+
+
+
+
 

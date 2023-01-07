@@ -3,5 +3,6 @@ from news import views
 
 
 urlpatterns = [
-    path('scrap_news/<domain>/', views.news_scrap, name ="news")
+    path('news_scrap/<domain>/', views.news_scrap, name ="news"),
+    path('user_home/<user_id>/', views.user_home_view, name ="home")
 ]

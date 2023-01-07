@@ -4,7 +4,7 @@ from django.contrib.auth import login, authenticate, logout
 
 import requests
 
-from user.forms import RegistrationForm, AccountAuthenticationForm
+from user.forms import RegistrationForm, AccountAuthenticationForm, PreferenceSelectionForm
 
 from user.models import NewsPreference, NewsDomain
 
@@ -54,9 +54,8 @@ def login_view(request, *args, **kwargs):
 				login(request, user)
 				is_exist_preference = NewsPreference.objects.filter(user_id=user.id, is_active=1)
 				if is_exist_preference:
-					print("Found")
+					return redirect('/user_home/'+str(user.id)) 
 				else:
-					print("not Found")
 					return preference_set_view(request)
 				# return redirect("home")
 
@@ -79,6 +78,28 @@ def preference_set_view(request):
 	all_available_preference['user'] = user
 
 	return render(request, "user/choose_preference.html", all_available_preference)
+
+
+def preference_submit(request, *args, **kwargs):
+	context = {}
+	if request.POST:
+		form = PreferenceSelectionForm(request.POST)
+		if form.is_valid():
+			user_id = request.POST['user_id']
+			news_preference = request.POST['news_preference']
+			old_preferences = NewsPreference.objects.filter(user_id=user_id, is_active=1)
+			if old_preferences:
+				for obj in old_preferences:
+					obj.is_active = False
+					obj.save()
+
+			new_preference_entry = NewsPreference(user_id=user_id, news_preference=news_preference)
+			new_preference_entry.save()
+
+	return HttpResponse("Updated!")
+
+
+
 
 
 

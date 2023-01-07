@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+{% include 'home_page_css.html' %}
+
+<div class="mainpage">
+    <div class="container">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="logo">
+                    NewsGator
+                </div>
+            </div>
+            <div class="row">
+                <div class="funtext">
+                    Your News is Ready by the Gator!
+                </div>
+            </div>
+            <div class="all_news_buttons">
+                {% for x,y in menu_items.items %}
+                    <div class="news_buttons">
+                        <a href="/news_scrap/{{x}}"><span>{{y}}</span></a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
