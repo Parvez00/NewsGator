@@ -8,22 +8,32 @@
 
 <section class="top_head">
 	<div class="container">
+    {% if messages %}
+          {% for message in messages %}
+          <div class="container-fluid p-0">
+            <div class="alert {{ message.tags }} alert-dismissible" role="alert" >
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="True">&times;</span>
+              </button>
+              {{ message }}
+            </div>
+          </div>
+          {% endfor %}
+        {% endif %}
     	<div class="row">
         	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
             	<div class="mobi_center">
                 	<ul>
-                    	<li><a href="javascript:void(0)">Archives</a></li>
-                        <li><a href="javascript:void(0)">Full width </a></li>
-                        <li><a href="javascript:void(0)">shortcodes</a></li> 
-                        <li><a href="javascript:void(0)">sitemap</a></li>
-                        <li><a href="javascript:void(0)">contact</a></li>
+                    	<li><a>Username: {{user.username}} | Email: {{user.email}}</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-            	<div class="text-right realtives gapping">
-                	<input type="text" class="accounts" placeholder="Search Here Visa News">
-                    <button class="buttons prev">SEARCH</button>
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" style="text-align: right;">
+            	<div class="mobi_center">
+                	<ul>
+                    	<li><a href="/preference_set/{{user.id}}">Edit Preference List</a></li>
+                        <li><a href="/logout">Logout</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -32,11 +42,8 @@
 <section class="mid_head">
 	<div class="container">
     	<div class="row">
-        	<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 mobi_center">
-            	<h1>Mahi Web</h1>
-            </div>
-            <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 mobi_center mobi_none">
-            	<img src="https://placeimg.com/750/60/any/grayscale" class="responde_ad" title="ad space">
+        	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mobi_center" style="text-align: center;padding-top: 5px;">
+            	<h1 class="logo">NewsGator</h1>
             </div>
         </div>
     </div>
@@ -52,17 +59,9 @@
                 </div>
             	<div class="navigation">
                 	<ul>
-                    	<li><a href="javascript:void(0)">HOME</a></li>
-                        <li><a href="javascript:void(0)">NEWS</a></li>
-                        <li><a href="javascript:void(0)">ECONOMY</a></li>
-                        <li><a href="javascript:void(0)">SPORTS</a></li>
-                        <li><a href="javascript:void(0)">SHOWS</a></li>
-                        <li><a href="javascript:void(0)">CULTURE & ART</a></li>
-                        <li><a href="javascript:void(0)">GOSSIPS</a></li>
-                        <li><a href="javascript:void(0)">FASHION</a></li>
-                        <li><a href="javascript:void(0)">HEALTH & BODY</a></li>
-                        <li><a href="javascript:void(0)">TECHNOLOGY</a></li>
-                        <li><a href="javascript:void(0)">SCIENCE</a></li>
+                        {% for id,domain_name in menu_items.items %}
+                    	    <li><a href="/news_scrap/{{id}}">{{domain_name}}</a></li>
+                        {% endfor %}
                     </ul>
                 </div>
             </div>
@@ -75,47 +74,52 @@
           <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12 flx_order">
 
             <div class="news_holder">
-            	<h3 class="page_title">NEWS</h3>
-                <div class="row">
-                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padd_right_none">
-                        <span class="realtives full">
-                            <img src="https://placeimg.com/263/158/any/grayscale">
-                            <span class="icon_bot">15</span>
-                        </span>
-                        <div class="news_cont">
-                            <a href="javascript:void(0)">North Korea Finds an Export: Epic Art</a>
+            	<h3 class="page_title">{{domain_name}}</h3>
+                <div class="news-cards">
+                    <!-- Card Loop -->
+                    {% for id,value in main_news.items %}
+                    <div class="product-card-container">
+                        <div class="product-card">
+                          <img src="{{value.2}}" alt="">
+                          <div class="product-card__body">
+                            <span class="tag">
+                              <p>{{value.3}}</p>
+                            </span>
+                            <h1>{{value.0}}</h1>
+                            
+                            <a href="{{value.1}}" target="_blank" class="btn">
+                                পুরো খবর পড়ুন
+                            </a>
+                      
+                          </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padd_left_none">
-                        <span class="realtives full">
-                            <img src="https://placeimg.com/263/158/any/grayscale">
-                            <span class="icon_bot">15</span>
-                        </span>
-                        <div class="news_cont">
-                            <a href="javascript:void(0)">North Korea Finds an Export: Epic Art</a>
-                        </div>
-                    </div>
+                    <!-- Card Loop Ends -->
+                    {% endfor %}
 
-                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padd_left_none">
-                        <span class="realtives full">
-                            <img src="https://placeimg.com/263/158/any/grayscale">
-                            <span class="icon_bot">15</span>
-                        </span>
-                        <div class="news_cont">
-                            <a href="javascript:void(0)">North Korea Finds an Export: Epic Art</a>
+                    {% for id,value in sub_news.items %}
+                    <div class="product-card-container">
+                        <div class="product-card">
+                          <img src="{{value.2}}" alt="">
+                          <div class="product-card__body">
+                            <span class="tag">
+                              <p>{{value.3}}</p>
+                            </span>
+                            <h1>{{value.0}}</h1>
+                            
+                            <a href="{{value.1}}" target="_blank" class="btn">
+                              পুরো খবর পড়ুন
+                            </a>
+                      
+                          </div>
                         </div>
                     </div>
-                    
-                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padd_left_none">
-                        <span class="realtives full">
-                            <img src="https://placeimg.com/263/158/any/grayscale">
-                            <span class="icon_bot">15</span>
-                        </span>
-                        <div class="news_cont">
-                            <a href="javascript:void(0)">North Korea Finds an Export: Epic Art</a>
-                        </div>
-                    </div>
+                    <!-- Card Loop Ends -->
+                    {% endfor %}
+                     
+                      
                 </div>
+               
             </div>
           </div>
           <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 flx_order">
@@ -123,23 +127,9 @@
             <div class="tab_bg">
             	<h4 class="page_title">You May Like</h4>
             	<ul class="tags_pag">
-                	<li><a href="javascript:void(0)">Integer</a></li> 
-                    <li><a href="javascript:void(0)">tincidunt</a></li>
-                    <li><a href="javascript:void(0)">Cras </a></li>
-                    <li><a href="javascript:void(0)">dapibus</a></li>
-                    <li><a href="javascript:void(0)">Vivamus</a></li> 
-                    <li><a href="javascript:void(0)">elementum </a></li>
-                    <li><a href="javascript:void(0)">semper </a></li>
-                    <li><a href="javascript:void(0)">nisi</a></li>
-                    <li><a href="javascript:void(0)">Aenean</a></li>
-                    <li><a href="javascript:void(0)">vulputate</a></li> 
-                    <li><a href="javascript:void(0)">eleifend</a></li> 
-                    <li><a href="javascript:void(0)">tellus</a></li>
-                    <li><a href="javascript:void(0)">Aenean</a></li> 
-                    <li><a href="javascript:void(0)">leo</a></li>
-                    <li><a href="javascript:void(0)">ligula</a></li>
-                    <li><a href="javascript:void(0)">porttitor</a></li>
-                    <li><a href="javascript:void(0)">eu</a></li>
+                {% for x in recommendation %}
+                	<li><a href="/news_scrap/{{x.id}}" target="_blank">{{x.domain_name}}</a></li> 
+                {% endfor %}
                 </ul>
             </div>
           </div>
@@ -147,5 +137,15 @@
     </div>
 </section>
 <div class="modal-shade"></div>
+<script>
+    	$('.nav-icn').on('click',function(){
+		  $('.navigation').addClass('navigation-show');
+		  $('.modal-shade').addClass('modal-shade-show');
+	})
+	$('.modal-shade').on('click',function(){
+		  $('.navigation').removeClass('navigation-show');
+		  $('.modal-shade').removeClass('modal-shade-show');
+	})
+</script>
 
 {% endblock content %}

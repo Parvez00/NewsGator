@@ -25,11 +25,15 @@
                             {% for domains in preferences %}
                             <div class="col-sm-3">
                                 <div class="quiz_card_area">
+                                    {% if domains.id|slugify in existing_preferences %}
+                                    <input class="quiz_checkbox" name="preferred_domains" type="checkbox" id="{{domains.id}}" value="{{domains.id}}" checked/>
+                                    {% else %}
                                     <input class="quiz_checkbox" name="preferred_domains" type="checkbox" id="{{domains.id}}" value="{{domains.id}}"/>
+                                    {% endif %}
                                     <div class="single_quiz_card">
                                         <div class="quiz_card_content">
                                             <div class="quiz_card_icon">
-                                                <div class="quiz_icon quiz_icon1" style ="background-image: None;"></div>
+                                                <div class="quiz_icon quiz_icon1" style ="background-image: url({{domains.domain_image}})"></div>
                                             </div><!-- end of quiz_card_media -->
     
                                             <div class="quiz_card_title">
@@ -40,11 +44,11 @@
                                 </div><!-- end of quiz_card_area -->
                             </div><!-- end of col3  -->
                             {% endfor %}
-                            <input type="hidden" value="{{user.id}}" name="user_id">
-                            <input type="text" name="news_preference" class="all_preferences">
+                            <input type="hidden" value="{{user}}" name="user_id">
+                            <input type="text" name="news_preference" class="all_preferences" hidden>
                             <div class="col-sm-12">
                                 <div class="quiz_next">
-                                    <input type="submit" class="quiz_continueBtn" value="Continue">
+                                    <input type="submit" class="quiz_continueBtn" value="Submit">
                                 </div><!-- end of quiz_next -->
                             </div><!-- end of col12 -->
                             

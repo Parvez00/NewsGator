@@ -4,8 +4,12 @@ from django.http import HttpResponse
 from bs4 import BeautifulSoup
 import requests
 
+from apyori import apriori
+
 from news.models import NewsDomainLink, NewsSite
 from user.models import NewsPreference, NewsDomain
+
+import pandas as pd
 
 # def news_scrap(request, domain):
 #     all_news = {}
@@ -38,11 +42,7 @@ from user.models import NewsPreference, NewsDomain
 #     return render(request,"news.html",dicts)
 
 
-def user_home_view(request,user_id):
-    send_context = {}
-    menu = MenuItems(user_id)
-    send_context['menu_items'] = menu.send_menu_items()
-    return render(request, "news/home_page.html", send_context)
+
 
 class MenuItems():
     def __init__(self,user_id):
@@ -60,6 +60,12 @@ class MenuItems():
 
         return menu_items
 
+def user_home_view(request,user_id):
+    send_context = {}
+    menu = MenuItems(user_id)
+    send_context['menu_items'] = menu.send_menu_items()
+    return render(request, "news/home_page.html", send_context)
+
 
 
 def news_scrap(request, domain):
@@ -75,11 +81,12 @@ def news_scrap(request, domain):
     sub_news_count = 1
 
     news = Scrapper(domain)
+    domain_name_class = DomainName(domain)
+    domain_name =  domain_name_class.domain_info()
 
     kaler_kantho_data = news.scrap_kaler_kantho()
     inquilab_data = news.scrap_inquilab()
 
-    # print(kaler_kantho_data['main_news'])
 
     for main_news_detail in kaler_kantho_data['main_news']:
         main_news_data[main_news_count] = main_news_detail
@@ -95,14 +102,34 @@ def news_scrap(request, domain):
 
     all_news['main_news'] = main_news_data
     all_news['sub_news'] = sub_news_data
+    all_news['domain_name'] = domain_name
+    all_news['user'] = user
 
+    min_support = 0.10
+    confidence = 0.50
+    min_lift = 1.1
+
+    recommendation = Recommendation(user.id,min_support,confidence,min_lift)
+    recommended_items = recommendation.get_recommendation()
+    all_news['recommendation'] = recommended_items
 
     return render(request,"news/news_page.html",all_news)
 
 
+class DomainName():
+    def __init__(self, domain):
+        self.domain_id = domain
+
+    def domain_info(self):
+        domain_name = NewsDomain.objects.filter(id = self.domain_id, is_active = 1).values_list('domain_name', flat=True)
+        domain_name = list(domain_name)
+        domain_name = domain_name[0]
+        return domain_name
+
 class Scrapper():
     def __init__(self, domain):
         self.domain_id = domain
+        self.no_img_available = "/media/no-img.jpg"
 
     def scrap_kaler_kantho(self):
         main_news = []
@@ -121,30 +148,30 @@ class Scrapper():
 
         for parent in main_parent_divs:
             news_link = parent.find('a')
-            news_url = news_link['href']
+            news_url = "https://www.kalerkantho.com"+news_link['href']
             
             news_heading = parent.find('h4')
             news_heading_text = news_heading.text
 
             news_image = parent.find('img')
-            news_image_url = news_image['src']
+            news_image_url = "https://www.kalerkantho.com"+news_image['src']
 
-            main_news.append([news_heading_text,news_url,news_image_url])
+            main_news.append([news_heading_text,news_url,news_image_url,'কালের কণ্ঠ'])
 
         sub_parent_divs = soup.find_all("li", class_="list-group-item")
 
         for sub_parent in sub_parent_divs:
             news_link = sub_parent.find('a')
-            news_url = news_link['href']
-            news_slug = news_url.split("/")
-            if(news_slug[2] == url[0][1]):
+            news_url_for_check = news_link['href']
+            news_url = "https://www.kalerkantho.com"+news_link['href']
+            news_slug = news_url_for_check.split("/")
+            if((news_slug[2] == url[0][1]) or (news_slug[2] == (url[0][1]).capitalize())):
                 news_heading = sub_parent.find('h5')
                 news_heading_text = news_heading.text
-                sub_news.append([news_heading_text,news_url])
+                sub_news.append([news_heading_text,news_url,self.no_img_available,'কালের কণ্ঠ'])
 
         all_news['main_news'] = main_news
         all_news['sub_news'] = sub_news
-
         return all_news
 
     def scrap_inquilab(self):
@@ -161,28 +188,91 @@ class Scrapper():
         htmlContent = site_loader.content
         soup = BeautifulSoup(htmlContent,'html.parser')
 
-        root_divs = soup.find("div", class_="row news_list")
+        root_divs_in = soup.find("div", class_="row news_list")
 
-        main_parent_divs = root_divs.find_all("a")
+        main_parent_divs_in = root_divs_in.find_all("a")
 
-        for parent in main_parent_divs:
-            news_url = parent['href']
 
-            news_heading = parent.find('h2')
+        for parent_in in main_parent_divs_in:
+            news_url = parent_in['href']
+
+            news_heading = parent_in.find('h2')
             news_heading_text = news_heading.text
 
-            news_image = parent.find('img')
-
-            news_image_url = None
+            news_image = parent_in.find('img')
 
             if news_image is not None:
                 news_image_url = news_image['src']
+                main_news.append([news_heading_text,news_url,news_image_url,'ইনকিলাব'])
+            else:
+                main_news.append([news_heading_text,news_url,self.no_img_available,'ইনকিলাব'])
 
-            main_news.append([news_heading_text,news_url,news_image_url])
+        all_news['main_news'] = main_news
 
-            all_news['main_news'] = main_news
+        return all_news
 
-            return all_news
+
+class Recommendation():
+    def __init__(self,user_id,min_support,confidence,min_lift):
+        self.user_id = user_id
+        self.min_support = min_support
+        self.confidence = confidence
+        self.min_lift = min_lift
+
+    def get_recommendation(self):
+        news_domains = NewsDomain.objects.all().values_list('id', flat=True)
+        news_domains = list(news_domains)
+        news_domains = map(str, news_domains)
+        news_domains = list(news_domains)
+
+
+        user_preferences = NewsPreference.objects.filter(user_id=self.user_id, is_active=1).values_list('news_preference', flat=True)
+        user_news_preference = list(user_preferences)
+        user_news_preference = user_news_preference[0].split(",")
+
+        all_preferences = NewsPreference.objects.all().values_list('news_preference', flat=True)
+        all_preferences = list(all_preferences)
+
+        all_preferred_combination = []
+
+        min_length = len(user_news_preference) + 1
+        
+        for domain_ids in all_preferences:
+            all_preferred_combination.append(domain_ids.split(","))
+
+        association_rules = apriori(all_preferred_combination, 
+                        min_support = self.min_support,
+                        min_confidence = self.confidence,
+                        min_lift = self.min_lift,
+                        min_length = 2)
+
+        association_results = list(association_rules)
+
+        all_items = []
+
+        for results in association_results:
+            items = list(results.items)
+            if len(items) >= min_length:
+                for item in items:
+                    all_items.append(item)
+
+        all_items = list(dict.fromkeys(all_items))
+
+        if len(all_items) == 0:
+            recommended_items = list(set(user_news_preference).symmetric_difference(set(news_domains)))
+
+        else:
+            recommended_items = list(set(user_news_preference).symmetric_difference(set(all_items)))
+
+        recommended_items_detail = NewsDomain.objects.filter(id__in=recommended_items).values()
+
+        return recommended_items_detail
+
+
+
+
+    
+
 
 
         

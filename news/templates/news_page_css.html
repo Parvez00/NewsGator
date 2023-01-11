@@ -17,6 +17,24 @@
     font-weight:400;
     font-style:normal
 }
+
+@font-face{
+    font-family:NikoshBan;
+    src:url("/media/NikoshBAN.ttf") format("truetype");
+}
+
+
+@font-face{
+    font-family:logoFont;
+    src:url('/media/Zt.ttf') format('truetype');
+}
+
+.logo{
+    font-family: logoFont;
+    font-weight: 600;
+    font-size: 45px;
+}
+
 ul{
     list-style:none;
     margin:0;
@@ -96,7 +114,7 @@ body{
     color:#303030
 }
 .mid_head{
-    background:#e52425;
+    background:#358fef;
     color:#fff
 }
 .responde_ad{
@@ -113,7 +131,8 @@ nav{
     font-size:13px;
     color:#fff;
     padding:10px 5px;
-    display:block
+    display:block;
+    text-transform: uppercase;
 }
 .navigation ul li a:hover{
     text-decoration:none;
@@ -331,7 +350,8 @@ ol.carousel-indicators{
     margin:0;
     padding:10px;
     text-transform:uppercase;
-    position:relative
+    position:relative;
+    text-align: center;
 }
 .right_section{
     padding:0 10px 5px
@@ -618,6 +638,86 @@ ul.tags_pag li a:hover{
     .flx_order:nth-child(3){
         order:3
     }
+}
+
+
+.news-cards{
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    font-family: NikoshBan;
+}
+
+
+.product-card-container {
+  background: aliceblue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.product-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 1px 1px 50px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  /* max-width: 800px; */
+  padding: 30px;
+  display: grid;
+  grid-template-columns: 40% auto;
+  grid-template-areas: "img body";
+  margin-top: 15px;
+}
+
+.product-card img {
+  max-height: 150px;
+  grid-area: img;
+}
+.product-card__body {
+  grid-area: body;
+  padding-left: 20px;
+}
+.product-card .product-card__body h1 {
+  margin-bottom: 15px;
+  font-size: 22px;
+  font-family: NikoshBan;
+  font-weight: bolder;
+}
+.product-card .product-card__body .price {
+  font-size: 18px;
+  text-decoration: line-through;
+}
+.product-card .product-card__body .discount {
+  font-size: 24px;
+  font-weight: bold;
+}
+.product-card .product-card__body .description {
+  margin-top: 15px;
+  color: #303030;
+}
+.tag p {
+  background: black;
+  color: white;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 50px;
+  margin-bottom: 15px;
+}
+.product-card__body .btn {
+  background: #168fe0;
+  border: none;
+  padding: 10px 20px;
+  outline: none;
+  border-radius: 5px;
+  color: white;
+  margin-top: 20px;
+  width: 100%;
+  box-shadow: 1px 4px 0px rgba(22, 143, 224, 0.5);
+  transition: all 200ms ease-in-out;
+  cursor: pointer;
+  font-size: 20px;
+}
+.product-card__body .btn:hover {
+  box-shadow: 0px 2px 0px rgba(22, 143, 224, 0.5);
 }
 
 </style>

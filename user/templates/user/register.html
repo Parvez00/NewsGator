@@ -11,6 +11,7 @@
       <div class="signin-signup">
         <form class="form-signup" method="post">
           {% csrf_token %}
+          <h2 class="logo">NewsGator</h2>
           <h2 class="title">Create an Account</h2>
           <div class="input-field">
             <i class="fas fa-envelope"></i>
@@ -31,30 +32,52 @@
           </div>
           <input type="submit" value="Create" class="btn solid">
         </form>
+        <div class="sub-note-div">
+          <h4 class="sub-note">Already have an account?</h4>
+          <a href="/login">Login Here!</a>
+        </div>
 
         {% for field in registration_form %}
 				<p>
 				{% for error in field.errors %}
-				<p style="color: red">{{ error }}</p>
+				<!-- <p style="color: red">{{ error }}</p> -->
+
+        <div class="container-fluid p-0">
+          <div class="alert alert-danger alert-dismissible" role="alert" >
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="True">&times;</span>
+            </button>
+            {{ error }}
+          </div>
+        </div>
 				{% endfor %}
 				</p>
 				{% endfor %}
 				{% if registration_form.non_field_errors %}
-				<div style="color: red">
+				<!-- <div style="color: red">
 					<p>{{registration_form.non_field_errors}}</p>
-				</div>
+				</div> -->
+
+        <div class="container-fluid p-0">
+          <div class="alert alert-danger alert-dismissible" role="alert" >
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="True">&times;</span>
+            </button>
+            {{ registration_form.non_field_errors }}
+          </div>
+        </div>
 
 				{% endif %}
       </div>
     </div>
     <div class="panels-container">
-      <div class="panel left-panel">
-        <div class="content">
+      <div class="panel left-panel login-back">
+        <!-- <div class="content">
           <h3>Already have an account?</h3>
           <p>Login to see your preferred news</p>
-          <button class="btn transparent" id="sign-up-btn">Login</button>
+          <a href="/login" class="btn transparent" id="sign-up-btn">Login</a>
         </div>
-        <img src="img/log.svg" class="image" alt="">
+        <img src="img/log.svg" class="image" alt=""> -->
       </div>
     </div>
   </div>

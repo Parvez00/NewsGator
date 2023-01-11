@@ -9,9 +9,22 @@
 <div class="container">
     <div class="forms-container">
       <div class="signin-signup">
+        {% if messages %}
+          {% for message in messages %}
+          <div class="container-fluid p-0">
+            <div class="alert {{ message.tags }} alert-dismissible" role="alert" >
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="True">&times;</span>
+              </button>
+              {{ message }}
+            </div>
+          </div>
+          {% endfor %}
+        {% endif %}
         <form class="form-signin" method="post">
           {% csrf_token %}
-          <h2 class="title">Create an Account</h2>
+          <h2 class="logo">NewsGator</h2>
+          <h2 class="title">Log In</h2>
           <div class="input-field">
             <i class="fas fa-envelope"></i>
             <input type="email" name="email" placeholder="Email" required="yes">
@@ -23,30 +36,46 @@
 
           <input type="submit" value="Login" class="btn solid">
         </form>
+        <div class="sub-note-div">
+          <h4 class="sub-note">Don't have an account yet?</h4>
+          <a href="/register">Register Here!</a>
+        </div>
 
         {% for field in login_form %}
         <p>
         {% for error in field.errors %}
-        <p style="color: red">{{ error }}</p>
+        <!-- <p style="color: red">{{ error }}</p> -->
+        <div class="container-fluid p-0">
+          <div class="alert alert-danger alert-dismissible" role="alert" >
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="True">&times;</span>
+            </button>
+            {{ error }}
+          </div>
+        </div>
         {% endfor %}
         </p>
         {% endfor %}
         {% if login_form.non_field_errors %}
-        <div style="color: red">
+        <!-- <div style="color: red">
         <p>{{login_form.non_field_errors}}</p>
+        </div> -->
+
+        <div class="container-fluid p-0">
+          <div class="alert alert-danger alert-dismissible" role="alert" >
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="True">&times;</span>
+            </button>
+            {{ login_form.non_field_errors }}
+          </div>
         </div>
 
         {% endif %}
       </div>
     </div>
     <div class="panels-container">
-      <div class="panel left-panel">
-        <div class="content">
-          <h3>Don't have an account?</h3>
-          <p>Register to NewsGator for make your life easier!</p>
-          <button class="btn transparent" id="sign-up-btn">Register</button>
-        </div>
-        <img src="img/log.svg" class="image" alt="">
+      <div class="panel left-panel login-back">
+        
       </div>
     </div>
   </div>

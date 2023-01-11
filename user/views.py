@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.contrib.auth import login, authenticate, logout
 
 import requests
+from django.contrib import messages
+
 
 from user.forms import RegistrationForm, AccountAuthenticationForm, PreferenceSelectionForm
 
@@ -12,8 +14,8 @@ from user.models import NewsPreference, NewsDomain
 
 def register_view(request, *args, **kwargs):
 	user = request.user
-	if user.is_authenticated: 
-		return HttpResponse("You are already authenticated as " + str(user.email))
+	# if user.is_authenticated: 
+	# 	return HttpResponse("You are already authenticated as " + str(user.email))
 
 	context = {}
 	if request.POST:
@@ -23,7 +25,8 @@ def register_view(request, *args, **kwargs):
 			email = form.cleaned_data.get('email').lower()
 			raw_password = form.cleaned_data.get('password1')
 			account = authenticate(email=email, password=raw_password)
-			# return redirect('home')
+			messages.success(request, "Registration Complete!")
+			return redirect('/login') 
 		else:
 			context['registration_form'] = form
 
@@ -35,7 +38,7 @@ def register_view(request, *args, **kwargs):
 
 def logout_view(request):
 	logout(request)
-	return redirect("login_view")
+	return redirect("login")
 
 
 
@@ -52,12 +55,14 @@ def login_view(request, *args, **kwargs):
 			user = authenticate(email=email, password=password)
 			if user:
 				login(request, user)
-				is_exist_preference = NewsPreference.objects.filter(user_id=user.id, is_active=1)
+				is_exist_preference = NewsPreference.objects.filter(user_id=user.id, is_active=1).values_list('news_preference', flat=True)
 				if is_exist_preference:
-					return redirect('/user_home/'+str(user.id)) 
+					user_news_preference = list(is_exist_preference)
+					user_news_preference = user_news_preference[0].split(",")
+					return redirect('/news_scrap/'+str(user_news_preference[0])) 
 				else:
-					return preference_set_view(request)
-				# return redirect("home")
+					# return preference_set_view(request)
+					return redirect('/preference_set/'+str(user.id)) 
 
 	else:
 		form = AccountAuthenticationForm()
@@ -67,15 +72,24 @@ def login_view(request, *args, **kwargs):
 	return render(request, "user/login.html", context)
 
 
-def preference_set_view(request):
+def preference_set_view(request,user_id):
 	all_available_preference = {}
 
-	user = request.user
+	user_id = user_id
 
 	preferences = NewsDomain.objects.filter(is_active=1)
 
+	existing_news_preference = NewsPreference.objects.filter(user_id=user_id, is_active=1).values_list('news_preference', flat=True)
+	if existing_news_preference:
+		existing_news_preference = list(existing_news_preference)
+		existing_news_preference = existing_news_preference[0].split(",")
+
+
 	all_available_preference['preferences'] = preferences
-	all_available_preference['user'] = user
+	all_available_preference['user'] = user_id
+	all_available_preference['existing_preferences'] = existing_news_preference
+
+	# print(existing_news_preference)
 
 	return render(request, "user/choose_preference.html", all_available_preference)
 
@@ -96,7 +110,13 @@ def preference_submit(request, *args, **kwargs):
 			new_preference_entry = NewsPreference(user_id=user_id, news_preference=news_preference)
 			new_preference_entry.save()
 
-	return HttpResponse("Updated!")
+			is_exist_preference = NewsPreference.objects.filter(user_id=user_id, is_active=1).values_list('news_preference', flat=True)
+			user_news_preference = list(is_exist_preference)
+			user_news_preference = user_news_preference[0].split(",")
+			messages.success(request, "Preference List Updated Successfully!")
+			return redirect('/news_scrap/'+str(user_news_preference[0])) 
+
+
 
 
 
