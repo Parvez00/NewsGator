@@ -98,9 +98,10 @@ def preference_submit(request, *args, **kwargs):
 	context = {}
 	if request.POST:
 		form = PreferenceSelectionForm(request.POST)
+		user_id = request.POST['user_id']
 		if form.is_valid():
-			user_id = request.POST['user_id']
 			news_preference = request.POST['news_preference']
+			print(news_preference)
 			old_preferences = NewsPreference.objects.filter(user_id=user_id, is_active=1)
 			if old_preferences:
 				for obj in old_preferences:
@@ -115,6 +116,10 @@ def preference_submit(request, *args, **kwargs):
 			user_news_preference = user_news_preference[0].split(",")
 			messages.success(request, "Preference List Updated Successfully!")
 			return redirect('/news_scrap/'+str(user_news_preference[0])) 
+
+		else:
+			messages.error(request, "Choose Atleast One News Domain!")
+			return redirect('/preference_set/'+str(user_id)) 
 
 
 

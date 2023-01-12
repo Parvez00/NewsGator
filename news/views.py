@@ -11,37 +11,7 @@ from user.models import NewsPreference, NewsDomain
 
 import pandas as pd
 
-# def news_scrap(request, domain):
-#     all_news = {}
-#     url = "https://www.bbc.com/news/" + domain
-#     r = requests.get(url)
-#     htmlContent = r.content
-#     soup = BeautifulSoup(htmlContent,'html.parser')
-#     parent_div = soup.find_all("a", class_="gs-c-promo-heading")
-
-#     news_count = 1
-
-#     for parent in parent_div:
-#         news_link = parent['href']
-#         all_headings = parent.find('h3')
-#         news_heading = all_headings.text
-
-#         if (news_link[:5] != 'https'):
-#             news_link = "https://www.bbc.com" + news_link
-        
-#         all_news[news_count] = [news_link,news_heading]
-
-#         news_count += 1
-    
-#     dicts = {}
-#     dicts['data'] =  all_news
-    
-
-#     print(dicts['data'])
-
-#     return render(request,"news.html",dicts)
-
-
+import random
 
 
 class MenuItems():
@@ -60,61 +30,6 @@ class MenuItems():
 
         return menu_items
 
-def user_home_view(request,user_id):
-    send_context = {}
-    menu = MenuItems(user_id)
-    send_context['menu_items'] = menu.send_menu_items()
-    return render(request, "news/home_page.html", send_context)
-
-
-
-def news_scrap(request, domain):
-    user = request.user
-    all_news = {}
-    main_news_data = {}
-    sub_news_data = {}
-
-    menu = MenuItems(user.id)
-    all_news['menu_items'] = menu.send_menu_items()
-
-    main_news_count = 1
-    sub_news_count = 1
-
-    news = Scrapper(domain)
-    domain_name_class = DomainName(domain)
-    domain_name =  domain_name_class.domain_info()
-
-    kaler_kantho_data = news.scrap_kaler_kantho()
-    inquilab_data = news.scrap_inquilab()
-
-
-    for main_news_detail in kaler_kantho_data['main_news']:
-        main_news_data[main_news_count] = main_news_detail
-        main_news_count+=1
-
-    for main_news_detail in inquilab_data['main_news']:
-        main_news_data[main_news_count] = main_news_detail
-        main_news_count+=1
-
-    for sub_news_detail in kaler_kantho_data['sub_news']:
-        sub_news_data[sub_news_count] = sub_news_detail
-        sub_news_count+=1
-
-    all_news['main_news'] = main_news_data
-    all_news['sub_news'] = sub_news_data
-    all_news['domain_name'] = domain_name
-    all_news['user'] = user
-
-    min_support = 0.10
-    confidence = 0.50
-    min_lift = 1.1
-
-    recommendation = Recommendation(user.id,min_support,confidence,min_lift)
-    recommended_items = recommendation.get_recommendation()
-    all_news['recommendation'] = recommended_items
-
-    return render(request,"news/news_page.html",all_news)
-
 
 class DomainName():
     def __init__(self, domain):
@@ -126,15 +41,26 @@ class DomainName():
         domain_name = domain_name[0]
         return domain_name
 
+
 class Scrapper():
     def __init__(self, domain):
         self.domain_id = domain
         self.no_img_available = "/media/no-img.jpg"
 
+    def search_existing_kaler_kantho(self, url, main_news):
+        self.m_news = main_news
+        self.url = url
+        
+        if self.url in self.m_news:
+            return True
+        else:
+            return False
+
     def scrap_kaler_kantho(self):
         main_news = []
         sub_news = []
         all_news= {}
+        all_main_news_link = []
         site_info = NewsSite.objects.filter(id = 1, is_active = 1).values_list('id', flat=True)
         site_info = list(site_info)
         url = NewsDomainLink.objects.filter(domain_id=self.domain_id, site_id=site_info[0], is_active = 1).values_list('domain_url', 'domain_slug')
@@ -157,18 +83,27 @@ class Scrapper():
             news_image_url = "https://www.kalerkantho.com"+news_image['src']
 
             main_news.append([news_heading_text,news_url,news_image_url,'কালের কণ্ঠ'])
+            all_main_news_link.append(news_url)
 
         sub_parent_divs = soup.find_all("li", class_="list-group-item")
+
 
         for sub_parent in sub_parent_divs:
             news_link = sub_parent.find('a')
             news_url_for_check = news_link['href']
             news_url = "https://www.kalerkantho.com"+news_link['href']
+            
             news_slug = news_url_for_check.split("/")
             if((news_slug[2] == url[0][1]) or (news_slug[2] == (url[0][1]).capitalize())):
-                news_heading = sub_parent.find('h5')
-                news_heading_text = news_heading.text
-                sub_news.append([news_heading_text,news_url,self.no_img_available,'কালের কণ্ঠ'])
+                # print(news_url)
+                is_already_exist = self.search_existing_kaler_kantho(news_url,all_main_news_link)
+                if is_already_exist == False:
+                    news_heading = sub_parent.find('h5')
+                    news_heading_text = news_heading.text
+                    sub_news.append([news_heading_text,news_url,self.no_img_available,'কালের কণ্ঠ'])
+
+
+        
 
         all_news['main_news'] = main_news
         all_news['sub_news'] = sub_news
@@ -210,6 +145,8 @@ class Scrapper():
         all_news['main_news'] = main_news
 
         return all_news
+
+
 
 
 class Recommendation():
@@ -260,13 +197,76 @@ class Recommendation():
 
         if len(all_items) == 0:
             recommended_items = list(set(user_news_preference).symmetric_difference(set(news_domains)))
+            recommended_items = recommended_items[:2]
 
         else:
             recommended_items = list(set(user_news_preference).symmetric_difference(set(all_items)))
+            recommended_items = recommended_items[:2]
 
         recommended_items_detail = NewsDomain.objects.filter(id__in=recommended_items).values()
 
         return recommended_items_detail
+
+
+
+def user_home_view(request,user_id):
+    send_context = {}
+    menu = MenuItems(user_id)
+    send_context['menu_items'] = menu.send_menu_items()
+    return render(request, "news/home_page.html", send_context)
+
+
+def news_scrap(request, domain):
+    user = request.user
+    all_news = {}
+    main_news_data = {}
+    sub_news_data = {}
+
+    menu = MenuItems(user.id)
+    all_news['menu_items'] = menu.send_menu_items()
+
+    main_news_count = 1
+    sub_news_count = 1
+
+    news = Scrapper(domain)
+    domain_name_class = DomainName(domain)
+    domain_name =  domain_name_class.domain_info()
+
+    kaler_kantho_data = news.scrap_kaler_kantho()
+    inquilab_data = news.scrap_inquilab()
+
+
+    for main_news_detail in kaler_kantho_data['main_news']:
+        main_news_data[main_news_count] = main_news_detail
+        main_news_count+=1
+
+    for main_news_detail in inquilab_data['main_news']:
+        main_news_data[main_news_count] = main_news_detail
+        main_news_count+=1
+
+    for sub_news_detail in kaler_kantho_data['sub_news']:
+        sub_news_data[sub_news_count] = sub_news_detail
+        sub_news_count+=1
+
+    all_news['main_news'] = main_news_data
+    all_news['sub_news'] = sub_news_data
+    all_news['domain_name'] = domain_name
+    all_news['user'] = user
+
+    min_support = 0.50
+    confidence = 0.70
+    min_lift = 1.1
+
+    recommendation = Recommendation(user.id,min_support,confidence,min_lift)
+    recommended_items = recommendation.get_recommendation()
+    all_news['recommendation'] = recommended_items
+
+    return render(request,"news/news_page.html",all_news)
+
+
+
+
+
 
 
 

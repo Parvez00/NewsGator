@@ -55,12 +55,6 @@ class PreferenceSelectionForm(forms.ModelForm):
 		fields = ('user_id','news_preference')
 		# exclude = ('is_active','added_at')
 
-	def clean(self):
-		user_id = self.cleaned_data['user_id']
-		news_preference = self.cleaned_data['news_preference']
-
-		if user_id == '' or news_preference == '':
-			raise forms.ValidationError("Please choose atleast one news domain!")
 
 
 
